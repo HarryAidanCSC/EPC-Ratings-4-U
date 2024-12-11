@@ -3,6 +3,7 @@ from time import strptime
 
 import streamlit as st
 
+from scrape_local_epc import EnergyCertificateScraper
 from src.backend_functions import get_addresses
 
 MONTHS: list[str] = [datetime.datetime.strptime(f"2024-{i}-01", "%Y-%m-%d").strftime("%B") for i in range(1, 13)]
@@ -98,3 +99,17 @@ if input_postcode:
         # has_lct
         urban_or_remote: bool = st.checkbox("Urban property?")
 
+        scraper = EnergyCertificateScraper(address, input_postcode)
+        scraper.parse_table()
+        scraper.scrape_current_certificate()
+        scraper.parse_current_certificate()
+
+        scraper.get_previous_reports()
+        scraper.collect_report_recommendation_history()
+
+        st.text(f"This property has the potential to have an energy rating of {scraper.potential_energy_rating} and an environmental rating of {scraper.potential_environmental_impact_rating}.")
+        st.dataframe(
+            scraper.full_recommendations_history
+        )
+
+        
