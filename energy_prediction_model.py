@@ -13,17 +13,17 @@ import joblib
 
 df = pd.read_csv(Path('data/OpenSynthReleaseDataBatch1.csv'))
 
-df = df.head(50000)
+df = df.head(300000)
 
 # Parse the `kwh` column as lists
 df["kwh"] = df["kwh"].apply(lambda x: ast.literal_eval(x))
 
 # Convert strings in the parsed arrays to integers and aggregate their sum
-df["kwh"] = df["kwh"].apply(lambda x: sum(int(i) for i in x))
+df["kwh"] = df["kwh"].apply(lambda x: sum(float(i) for i in x))
+
 
 # Identify categorical columns
 categorical_columns = df.select_dtypes(include=['object']).columns
-# %%   
 columns_to_keep = df.drop(columns=categorical_columns).reset_index(drop=True)
 
 for column in categorical_columns:
@@ -39,7 +39,7 @@ for column in categorical_columns:
     columns_to_keep = pd.concat([columns_to_keep, encoded_df.reset_index(drop=True)], axis=1)
 
 df = columns_to_keep
-
+# %%
 # Define the dependent variable (target) and independent variables (features)
 X = df.drop(columns=['kwh'])
 y = df['kwh']
