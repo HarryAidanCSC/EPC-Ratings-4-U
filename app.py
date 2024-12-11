@@ -1,10 +1,11 @@
 import datetime
+import random
 from time import sleep, strptime
 
 import streamlit as st
 
 from scrape_local_epc import EnergyCertificateScraper
-from src.backend_functions import get_addresses
+from src.backend_functions import get_addresses, get_certificates, mwh_usage
 
 MONTHS: list[str] = [datetime.datetime.strptime(f"2024-{i}-01", "%Y-%m-%d").strftime("%B") for i in range(1, 13)]
 
@@ -106,6 +107,18 @@ if input_postcode:
 
         scraper.get_previous_reports()
         scraper.collect_report_recommendation_history()
+
+        epc, median_rating = get_certificates(address, input_postcode)
+        st.text(f"Your EPC rating is {epc}, compared with an average of {median_rating} in your postcode.")
+        
+        expected_energy_usage: float = mwh_usage(
+            epc=epc,
+            user_inputs=[month, property_type, area, has_heat_pump, has_solar, has_ev, urban_or_remote]
+        )
+        observed_energy_usage: float = random.gauss(mu=1, sigma=0.25) * expected_energy_usage
+
+        st.text(f"The energy usage expected for your property per day, based on the attributes listed above, would be {expected_energy_usage:.2f}kWh. The actual usage observed is {observed_energy_usage:.2f}kWh.")
+
 
         st.text(f"This property has the potential to have an energy rating of {scraper.potential_energy_rating} and an environmental rating of {scraper.potential_environmental_impact_rating}.")
         st.dataframe(
