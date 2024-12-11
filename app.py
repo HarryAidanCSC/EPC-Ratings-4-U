@@ -93,7 +93,7 @@ if input_postcode:
             label="Property type",
             options=["Detached", "Semi-detached", "Terrace", "Flat"],
         )
-        area: int = st.number_input("Floor area (m^2)", min_value=0, help="Floor area in metres squared")
+        area: int = st.number_input("Floor area (m^2)", min_value=0, value=100, help="Floor area in metres squared")
         has_heat_pump: bool = st.checkbox("Has heat pump")
         # has_battery
         has_solar: bool = st.checkbox("Has solar")
@@ -119,14 +119,14 @@ if input_postcode:
             epc=epc,
             user_inputs=[month, property_type, area, has_heat_pump, has_solar, has_ev, urban_or_remote]
         )
-        observed_energy_usage: float = generate_random_number(mwh_usage(epc, [0, "Flat", 90, 1, 1, 0, 1]))
+        observed_energy_usage: float = generate_random_number(mwh_usage(epc, [month, "Flat", 90, 1, 1, 0, 1]))
 
-        st.text(f"The energy usage expected for your property per day, based on the attributes listed above, would be {expected_energy_usage:.2f}kWh. The actual usage observed is {observed_energy_usage:.2f}kWh.")
+        st.text(f"For the month of {MONTHS[month]}, the energy usage expected for your property per day, based on the attributes listed above, would be {expected_energy_usage:.2f}kWh. The actual usage observed on average was {observed_energy_usage:.2f}kWh, for the last {MONTHS[month]} for which we have data.")
 
 
         st.text(f"This property has the potential to have an energy rating of {scraper.potential_energy_rating} and an environmental rating of {scraper.potential_environmental_impact_rating}.")
         st.dataframe(
-            scraper.full_recommendations_history
+            scraper.full_recommendations_history.set_index("date")
         )
 
         show_ai_summarisation_tool: bool = st.checkbox("Show AI summarisation")
