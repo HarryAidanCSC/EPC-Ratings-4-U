@@ -54,6 +54,17 @@ class EnergyCertificateScraper:
         median_rating = inverse_rating_map[median_num]
         
         return median_rating
+    
+    def scrape_certificate(self):     
+        if self.cert_url is None:
+            self.parse_table()
+        self.cert_response = requests.get(self.url, headers=self.headers)
+        print(f"Certificate Status Code: {self.cert_response.status_code}")
+        
+        if self.cert_response.status_code == 200:
+            self.cert_soup = BeautifulSoup(self.cert_response.content, 'html.parser')
+        else:
+            return f"Failed to retrieve data, status code: {self.cert_response.status_code}"
 
     
     def return_df(self):
@@ -67,4 +78,5 @@ scraper = EnergyCertificateScraper('5, Barbican Mews, YORK, YO10 5BZ', "YO105BZ"
 scraper.parse_table()
 avg_rating = scraper.average_rating()
 print(f"Average rating: {scraper.average_rating()},\n Your rating: {scraper.return_epc()}")
-print(scraper.cert_url)
+scraper.scrape_certificate()
+# print(scraper.cert_soup)
