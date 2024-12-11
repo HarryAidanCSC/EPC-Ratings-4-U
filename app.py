@@ -1,6 +1,11 @@
+import datetime
+from time import strptime
+
 import streamlit as st
 
 from src.backend_functions import get_addresses
+
+MONTHS: list[str] = [datetime.datetime.strptime(f"2024-{i}-01", "%Y-%m-%d").strftime("%B") for i in range(1, 13)]
 
 header_css = """
     <style>
@@ -68,4 +73,28 @@ input_postcode = st.text_input(label="Postcode", placeholder="Enter your postcod
 st.text(input_postcode)
 
 if input_postcode:
-    st.selectbox(label="Select address", options=get_addresses(input_postcode))
+    address: str = st.selectbox(label="Select address", options=get_addresses(input_postcode))
+
+    if address:
+
+        month: int = MONTHS.index(
+            st.selectbox(
+                "Month",
+                options=MONTHS,
+            )
+        )
+        property_type: str = st.selectbox(
+            label="Property type",
+            options=["Detached", "Semi-detached", "Terrace", "Flat"],
+        )
+        area: int = st.number_input("Floor area (m^2)", min_value=0, help="Floor area in metres squared")
+        has_heat_pump: bool = st.checkbox("Has heat pump")
+        # has_battery
+        has_solar: bool = st.checkbox("Has solar")
+        # has_electric_hot_water
+        # has_electric_radiator
+        # is_mains_gas
+        has_ev: bool = st.checkbox("Has electric vehicle")
+        # has_lct
+        urban_or_remote: bool = st.checkbox("Urban property?")
+
