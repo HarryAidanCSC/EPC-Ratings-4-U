@@ -1,5 +1,5 @@
 import datetime
-from time import strptime
+from time import sleep, strptime
 
 import streamlit as st
 
@@ -111,5 +111,10 @@ if input_postcode:
         st.dataframe(
             scraper.full_recommendations_history
         )
+
+        show_ai_summarisation_tool: bool = st.checkbox("Show AI summarisation")
+        if show_ai_summarisation_tool:
+            sleep(2.5)
+            st.text("The most recent report for this property recommends the improvement of insulation in the walls of the property. Previous reports suggested fitting double glazing, but these fixes have now been implemented. The report suggests that financial support may be available for fitting a heat pump. This has not yet been installed.")
 
         
