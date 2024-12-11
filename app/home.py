@@ -1,5 +1,3 @@
-import os
-
 import streamlit as st
 
 header_css = """
