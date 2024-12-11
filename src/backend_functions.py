@@ -99,29 +99,28 @@ def mwh_usage(epc: str, user_inputs: list[str]):
     new.extend([0]*11)
     if user_inputs[0] != 0:
         new[2+user_inputs[0]] = 1
-    if user_inputs[1] == "Flat": new.extend([1,])
-    elif user_inputs[1] == "Semi-detached": new.extend([])
-    elif user_inputs[1] == "Terraced": new.extend([])
+    if user_inputs[1] == "Flat": new.extend([1,0,0])
+    elif user_inputs[1] == "Semi-detached": new.extend([0,1,0])
+    elif user_inputs[1] == "Terraced": new.extend([0,0,1])
     else: new.extend([0,0,0])
     if epc in ("D","E"): new.extend([1,0])
     elif epc in ("F","G"): new.extend([0,1])
     else: new.extend([0,0])
     if user_inputs[-1] == 1: new.extend([1])
-    print(new)
+    else: new.extend([0])
     
     # Load the model
     loaded_model = joblib.load(Path('src/model/lr_model.pkl'))
     features = list(loaded_model.feature_names_in_)
     user_data = {}
     for i in range(len(features)):
-        user_data[str(features[i])] = 1
-    print(features)
+        user_data[str(features[i])] = new[i]
     user_data  = pd.DataFrame(user_data, index=[0])
     
-    
+    print(user_data, new)
     return loaded_model.predict(user_data)[0]
 
 
 get_addresses("MK5 7HE")
 get_certificates('4, Bushey Bartrams, Shenley Brook End, MILTON KEYNES, MK5 7HE', 'MK5 7HE')
-mwh_usage("A", [1,"Detached",1000,1,1,1,1])
+print(mwh_usage("E", [0,"Flat",1000,1,1,1,1]))
