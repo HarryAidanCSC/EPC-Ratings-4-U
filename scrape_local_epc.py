@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import datetime
 
 
 def scrape_certificate(url: str) -> BeautifulSoup:
@@ -18,6 +19,8 @@ def scrape_certificate(url: str) -> BeautifulSoup:
         return fail_message
 
 def parse_certificate_for_recommendations(cert_soup: BeautifulSoup) -> pd.DataFrame:
+    date_str: str = cert_soup.find("dt", string = "Date of assessment").find_next("dd").text.strip()
+    date: datetime.datetime = datetime.datetime.strptime(date_str, '%d %B %Y')
     recommendations_section = cert_soup.find("h2", string="Steps you could take to save energy")
     # self.recommendations: str = ""
     for sib in recommendations_section.find_all_next():
@@ -26,6 +29,12 @@ def parse_certificate_for_recommendations(cert_soup: BeautifulSoup) -> pd.DataFr
             recommendations_div = sib.find("hr")
             break
     recommendations_df: pd.DataFrame = pd.DataFrame({
+        "date": pd.Series(
+            [
+                date
+                for child in recommendations_div.find_all("h3")
+            ],
+        ),
         "recommendation": pd.Series(
             [
                 re.sub(r"Step [1-9][0-9]*:\s(.+)", r"\1", child.text)
@@ -152,6 +161,13 @@ class EnergyCertificateScraper:
             )
             for url in self.previous_report_urls
         ]
+    
+    def collect_report_recommendation_history(self) -> pd.DataFrame:
+        self.full_recommendations_history: pd.DataFrame = pd.concat([
+            self.recommendations_df,
+            pd.concat(self.previous_reports)
+        ])
+        return self.full_recommendations_history
      
     def return_df(self):
         return self.df
@@ -171,4 +187,4 @@ scraper.parse_current_certificate()
 print(scraper.recommendations_df)
 
 print(scraper.get_previous_reports())
-print(scraper.previous_reports)
+print(scraper.collect_report_recommendation_history())
