@@ -5,6 +5,18 @@ import pandas as pd
 import re
 
 
+def scrape_certificate(url: str) -> BeautifulSoup:
+    response = requests.get(url)
+    print(f"Certificate Status Code: {response.status_code}")
+    
+    if response.status_code == 200:
+        cert_soup: BeautifulSoup = BeautifulSoup(response.content, 'html.parser')
+        return cert_soup
+    else:
+        fail_message: str = f"Failed to retrieve data, status code: {response.status_code}"
+        print(fail_message)
+        return fail_message
+
 def parse_certificate_for_recommendations(cert_soup: BeautifulSoup) -> pd.DataFrame:
     recommendations_section = cert_soup.find("h2", string="Steps you could take to save energy")
     # self.recommendations: str = ""
@@ -110,19 +122,14 @@ class EnergyCertificateScraper:
     def scrape_current_certificate(self) -> None:     
         if self.cert_url is None:
             self.parse_table()
-        self.cert_response = requests.get(self.cert_url)
-        print(f"Certificate Status Code: {self.cert_response.status_code}")
-        
-        if self.cert_response.status_code == 200:
-            self.cert_soup: BeautifulSoup = BeautifulSoup(self.cert_response.content, 'html.parser')
-        else:
-            return f"Failed to retrieve data, status code: {self.cert_response.status_code}"
+        self.cert_soup = scrape_certificate(self.cert_url)
 
     def parse_current_certificate(self) -> None:
         if self.cert_soup is None:
             self.scrape_current_certificate()
         
         # Get potential energy rating
+        print(self.cert_soup)
         self.potential_energy_rating: str = re.findall(
             r"energy rating is [A-G]\. It has the potential to be [A-G]",
             str(self.cert_soup),
@@ -136,6 +143,15 @@ class EnergyCertificateScraper:
         )[0][-1]
 
         self.recommendations_df: pd.DataFrame = parse_certificate_for_recommendations(self.cert_soup)
+    
+    def get_previous_reports(self) -> None:
+        self.previous_report_urls: list[str] = [tag.find_next("a").get("href") for tag in self.cert_soup.find_all("dt") if "Certificate number" in tag.text]
+        self.previous_reports: list[BeautifulSoup] = [
+            parse_certificate_for_recommendations(
+                scrape_certificate(f"https://find-energy-certificate.service.gov.uk{url}")
+            )
+            for url in self.previous_report_urls
+        ]
      
     def return_df(self):
         return self.df
@@ -153,3 +169,6 @@ scraper.scrape_current_certificate()
 # print(scraper.cert_soup)
 scraper.parse_current_certificate()
 print(scraper.recommendations_df)
+
+print(scraper.get_previous_reports())
+print(scraper.previous_reports)
