@@ -1,5 +1,13 @@
 # EPC-Ratings-4-U
 
+## Running the app
+
+Run the app by entering the below into a terminal:
+
+``` shell
+streamlit run app.py
+```
+
 ## Example Product Vision 1
 
 Understanding whether you have an accurate EPC rating is hard, but can be important if you're looking at getting a new certificate. 
