@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 from sklearn.metrics import r2_score
+import joblib
 
 
 
@@ -61,3 +62,6 @@ print(f"Model Coefficients: {model.coef_}")
 print(f"Model Intercept: {model.intercept_}")
 r2 = r2_score(y_test, y_pred)
 print(f"R-squared: {r2}")
+
+# Save model
+joblib.dump(model, 'model/lr_model.pkl')
