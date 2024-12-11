@@ -9,6 +9,10 @@ from src.backend_functions import get_addresses, get_certificates, mwh_usage
 
 MONTHS: list[str] = [datetime.datetime.strptime(f"2024-{i}-01", "%Y-%m-%d").strftime("%B") for i in range(1, 13)]
 
+def generate_random_number(input: float) -> float:
+    random.seed(42)
+    return random.gauss(mu=1, sigma=0.25) * input
+
 header_css = """
     <style>
         .header {
@@ -115,7 +119,7 @@ if input_postcode:
             epc=epc,
             user_inputs=[month, property_type, area, has_heat_pump, has_solar, has_ev, urban_or_remote]
         )
-        observed_energy_usage: float = random.gauss(mu=1, sigma=0.25) * expected_energy_usage
+        observed_energy_usage: float = generate_random_number(mwh_usage(epc, [0, "Flat", 90, 1, 1, 0, 1]))
 
         st.text(f"The energy usage expected for your property per day, based on the attributes listed above, would be {expected_energy_usage:.2f}kWh. The actual usage observed is {observed_energy_usage:.2f}kWh.")
 
