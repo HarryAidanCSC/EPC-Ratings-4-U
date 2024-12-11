@@ -5,7 +5,7 @@
 Run the app by entering the below into a terminal:
 
 ``` shell
-streamlit run app/home.py
+streamlit run app.py
 ```
 
 ## Example Product Vision 1

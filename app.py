@@ -1,5 +1,7 @@
 import streamlit as st
 
+from src.backend_functions import get_addresses
+
 header_css = """
     <style>
         .header {
@@ -66,4 +68,4 @@ input_postcode = st.text_input(label="Postcode", placeholder="Enter your postcod
 st.text(input_postcode)
 
 if input_postcode:
-    st.selectbox(label="Select address", options=["1b Heriot Road, Hendon, London, NW4 2EG", "1c Heriot Road, Hendon, London, NW4 2EG"])
+    st.selectbox(label="Select address", options=get_addresses(input_postcode))
