@@ -29,13 +29,14 @@ class EnergyCertificateScraper:
             cells = [td.text.strip() for td in tr.find_all('td')]
             head += cells
             
-            
-            
             if head[0] != 'Address':
                 if head[0] == self.address:
                     self.epc = head[1]
+                    cert_url = tr.find('th').find("a").get("href")
+                    self.cert_url: str = f"https://find-energy-certificate.service.gov.uk{cert_url}"
                 else: 
                     rows.append(head)
+        self.rows = rows
         self.df = pd.DataFrame(rows, columns=['address', 'rating', 'expired'])
     
     def average_rating(self):
@@ -66,3 +67,4 @@ scraper = EnergyCertificateScraper('5, Barbican Mews, YORK, YO10 5BZ', "YO105BZ"
 scraper.parse_table()
 avg_rating = scraper.average_rating()
 print(f"Average rating: {scraper.average_rating()},\n Your rating: {scraper.return_epc()}")
+print(scraper.cert_url)
