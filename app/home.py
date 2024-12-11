@@ -62,3 +62,10 @@ st.markdown(
         "</p>",
         unsafe_allow_html=True,
     )
+
+input_postcode = st.text_input(label="Postcode", placeholder="Enter your postcode", max_chars=8, help="Enter your postcode")
+
+st.text(input_postcode)
+
+if input_postcode:
+    st.selectbox(label="Select address", options=["1b Heriot Road, Hendon, London, NW4 2EG", "1c Heriot Road, Hendon, London, NW4 2EG"])
