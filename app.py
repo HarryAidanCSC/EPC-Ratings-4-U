@@ -4,7 +4,7 @@ from time import sleep, strptime
 
 import streamlit as st
 
-from scrape_local_epc import EnergyCertificateScraper
+from src.scrape_local_epc import EnergyCertificateScraper
 from src.backend_functions import get_addresses, get_certificates, mwh_usage
 
 MONTHS: list[str] = [datetime.datetime.strptime(f"2024-{i}-01", "%Y-%m-%d").strftime("%B") for i in range(1, 13)]
