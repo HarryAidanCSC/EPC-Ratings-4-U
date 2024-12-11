@@ -19,4 +19,8 @@ There's some frontend work required as well.
 3. Given these readings, then we suggest their likelihood of being an outlier
 4. If we have time also make some recommendations as well.
 
-
+# The Data
+- EPC certificates were scraped from gov.uk, including certificates from neighbouring residential buildings and property reports
+- A regression model was trained on data from OpenSynth __(OpenSynthReleaseDataBatch)__ which models half-hourly electricity usage based on a variety of features including: whether a property has a heat pump installed,whether the household uses an electric vehicle and the type of property, month, whether a property has solar panels and it's EPC rating
+- Only flats, detatched, semi-detatched and terraced properties are modelled 
+-  Some voodoo magic is then used to decipher the actual electricity usage of a proprtyu
