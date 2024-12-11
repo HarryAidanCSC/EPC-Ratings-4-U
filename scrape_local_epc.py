@@ -103,7 +103,7 @@ class EnergyCertificateScraper:
             head += cells
             
             if head[0] != 'Address':
-                if head[0] == self.address:
+                if head[0].lower() == self.address.lower():
                     self.epc = head[1]
                     cert_url = tr.find('th').find("a").get("href")
                     self.cert_url: str = f"https://find-energy-certificate.service.gov.uk{cert_url}"
@@ -165,7 +165,7 @@ class EnergyCertificateScraper:
     def collect_report_recommendation_history(self) -> pd.DataFrame:
         self.full_recommendations_history: pd.DataFrame = pd.concat([
             self.recommendations_df,
-            pd.concat(self.previous_reports)
+            pd.concat([report for report in self.previous_reports if not report.empty])
         ])
         return self.full_recommendations_history
      
@@ -177,7 +177,7 @@ class EnergyCertificateScraper:
 
 
 # scraper = EnergyCertificateScraper('5, Barbican Mews, YORK, YO10 5BZ', "YO105BZ")
-scraper = EnergyCertificateScraper("1C HERIOT ROAD, HENDON, LONDON, NW4 2EG", "NW42EG")
+scraper = EnergyCertificateScraper("1c Heriot Road, Hendon, London, NW4 2EG", "NW42EG")
 scraper.parse_table()
 avg_rating = scraper.average_rating()
 print(f"Average rating: {scraper.average_rating()},\n Your rating: {scraper.return_epc()}")
