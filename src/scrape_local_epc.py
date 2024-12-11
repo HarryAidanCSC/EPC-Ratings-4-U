@@ -1,4 +1,3 @@
-# %%
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -145,7 +144,7 @@ class EnergyCertificateScraper:
             flags=re.IGNORECASE
         )[0][-1]
         # Get potential environmental impact rating
-        self.potential_environmenal_impact_rating: str = re.findall(
+        self.potential_environmental_impact_rating: str = re.findall(
             r"environmental impact rating is [A-G]\. It has the potential to be [A-G]",
             str(self.cert_soup),
             flags=re.IGNORECASE
