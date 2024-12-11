@@ -4,6 +4,57 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 
+
+def parse_certificate_for_recommendations(cert_soup: BeautifulSoup) -> pd.DataFrame:
+    recommendations_section = cert_soup.find("h2", string="Steps you could take to save energy")
+    # self.recommendations: str = ""
+    for sib in recommendations_section.find_all_next():
+        # where improvement tables are kept
+        if sib.name=="div" and " ".join(sib.get("class")) == "govuk-body printable-area epb-recommended-improvements":
+            recommendations_div = sib.find("hr")
+            break
+    recommendations_df: pd.DataFrame = pd.DataFrame({
+        "recommendation": pd.Series(
+            [
+                re.sub(r"Step [1-9][0-9]*:\s(.+)", r"\1", child.text)
+                for child in recommendations_div.find_all("h3")
+            ],
+            dtype=str,
+        ),
+        "min_typical_installation_cost_gbp": pd.Series(
+            [
+                int(
+                    re.findall(
+                        r"£[1-9][0-9,]*", child.find_next("dd").text.strip()
+                    )[0].replace(",", "").replace("£", "")
+                )
+                for child in recommendations_div.find_all("h3")
+            ],
+            dtype=int),
+        "max_typical_installation_cost_gbp": pd.Series(
+            [
+                int(
+                    re.findall(
+                        r"£[1-9][0-9,]*", child.find_next("dd").text.strip()
+                    )[-1].replace(",", "").replace("£", "")
+                )
+                for child in recommendations_div.find_all("h3")
+            ],
+            dtype=int),
+        "typical_yearly_saving": pd.Series(
+            [
+                int(
+                    re.findall(
+                        r"£[1-9][0-9,]*", child.find_next("dd").find_next("dd").text.strip()
+                    )[0].replace(",", "").replace("£", "")
+                )
+                for child in recommendations_div.find_all("h3")
+            ],
+            dtype=int),
+    })
+
+    return recommendations_df
+
 class EnergyCertificateScraper:
     def __init__(self, address, postcode):
         self.postcode = postcode.replace(" ", "%20")
@@ -84,52 +135,7 @@ class EnergyCertificateScraper:
             flags=re.IGNORECASE
         )[0][-1]
 
-        recommendations_section = self.cert_soup.find("h2", string="Steps you could take to save energy")
-        # self.recommendations: str = ""
-        for sib in recommendations_section.find_all_next():
-            # where improvement tables are kept
-            if sib.name=="div" and " ".join(sib.get("class")) == "govuk-body printable-area epb-recommended-improvements":
-                recommendations_div = sib.find("hr")
-                break
-        self.recommendations_df: pd.DataFrame = pd.DataFrame({
-            "recommendation": pd.Series(
-                [
-                    re.sub(r"Step [1-9][0-9]*:\s(.+)", r"\1", child.text)
-                    for child in recommendations_div.find_all("h3")
-                ],
-                dtype=str,
-            ),
-            "min_typical_installation_cost_gbp": pd.Series(
-                [
-                    int(
-                        re.findall(
-                            r"£[1-9][0-9,]*", child.find_next("dd").text.strip()
-                        )[0].replace(",", "").replace("£", "")
-                    )
-                    for child in recommendations_div.find_all("h3")
-                ],
-                dtype=int),
-            "max_typical_installation_cost_gbp": pd.Series(
-                [
-                    int(
-                        re.findall(
-                            r"£[1-9][0-9,]*", child.find_next("dd").text.strip()
-                        )[-1].replace(",", "").replace("£", "")
-                    )
-                    for child in recommendations_div.find_all("h3")
-                ],
-                dtype=int),
-            "typical_yearly_saving": pd.Series(
-                [
-                    int(
-                        re.findall(
-                            r"£[1-9][0-9,]*", child.find_next("dd").find_next("dd").text.strip()
-                        )[0].replace(",", "").replace("£", "")
-                    )
-                    for child in recommendations_div.find_all("h3")
-                ],
-                dtype=int),
-        })
+        self.recommendations_df: pd.DataFrame = parse_certificate_for_recommendations(self.cert_soup)
      
     def return_df(self):
         return self.df
