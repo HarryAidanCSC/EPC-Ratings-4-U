@@ -13,7 +13,17 @@ import joblib
 
 df = pd.read_csv(Path('data/OpenSynthReleaseDataBatch1.csv'))
 
-df = df.head(300000)
+valid_property_types = ['Detached', 'Semi Detached', 'Terraced', 'Flat']
+df = df[df['property_type'].isin(valid_property_types)]
+
+
+# Specify the columns to include
+desired_columns = [
+    'month_of_year','has_heat_pump', 'has_solar_pv', #
+    'has_ev', 'property_type', 'kwh', 'energy_rating', 'urbanity'
+]
+
+df = df[desired_columns]
 
 # Parse the `kwh` column as lists
 df["kwh"] = df["kwh"].apply(lambda x: ast.literal_eval(x))
